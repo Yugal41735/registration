@@ -76,6 +76,62 @@ const testAPI = async () => {
        console.log('❌ Error:', error.response?.data || error.message);
      }
 
+    // Test 6: Search by city
+    console.log('6. Testing GET /api/v1/employees/search?city=Mumbai');
+    try {
+      const response = await axios.get(`${API_BASE_URL}/v1/employees/search?city=Mumbai`, {
+        headers: {
+          'Authorization': `Bearer ${API_TOKEN}`
+        }
+      });
+      console.log('✅ Success:', response.data);
+      if (response.data.data && response.data.data.length > 0) {
+        const hasCity = response.data.data.every(emp => emp.city === 'Mumbai');
+        console.log('   City field present and correct:', hasCity);
+      }
+    } catch (error) {
+      console.log('❌ Error:', error.response?.data || error.message);
+    }
+
+    console.log('\n' + '='.repeat(50) + '\n');
+
+    // Test 7: Search by first_name and city
+    console.log('7. Testing GET /api/v1/employees/search?first_name=John&city=Mumbai');
+    try {
+      const response = await axios.get(`${API_BASE_URL}/v1/employees/search?first_name=John&city=Mumbai`, {
+        headers: {
+          'Authorization': `Bearer ${API_TOKEN}`
+        }
+      });
+      console.log('✅ Success:', response.data);
+      if (response.data.data && response.data.data.length > 0) {
+        const allMatch = response.data.data.every(emp => emp.first_name === 'John' && emp.city === 'Mumbai');
+        console.log('   All results match first_name and city:', allMatch);
+      }
+    } catch (error) {
+      console.log('❌ Error:', error.response?.data || error.message);
+    }
+
+    console.log('\n' + '='.repeat(50) + '\n');
+
+    // Test 8: Search by attendance_status
+    console.log('8. Testing GET /api/v1/employees/search?attendance_status=Present');
+    try {
+      const response = await axios.get(`${API_BASE_URL}/v1/employees/search?attendance_status=Present`, {
+        headers: {
+          'Authorization': `Bearer ${API_TOKEN}`
+        }
+      });
+      console.log('✅ Success:', response.data);
+      if (response.data.data && response.data.data.length > 0) {
+        const allPresent = response.data.data.every(emp => emp.attendance_status === 'Present');
+        console.log('   All results have attendance_status Present:', allPresent);
+      }
+    } catch (error) {
+      console.log('❌ Error:', error.response?.data || error.message);
+    }
+
+    console.log('\n' + '='.repeat(50) + '\n');
   } catch (error) {
     console.error('Test failed:', error.message);
   }
