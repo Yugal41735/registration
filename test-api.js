@@ -197,6 +197,69 @@ const testAPI = async () => {
     } catch (error) {
       console.log('❌ Error:', error.response?.data || error.message);
     }
+
+    console.log('\n' + '='.repeat(50) + '\n');
+
+    // Test 13: Get Present employees count
+    console.log('13. Testing Attendance Count - Present Employees');
+    try {
+      const response = await axios.get(`${API_BASE_URL}/v1/employee/search?attendance_status=Present&page=1&limit=1`, {
+        headers: {
+          'Authorization': `Bearer ${API_TOKEN}`
+        }
+      });
+      console.log('✅ Success - Present Count:', response.data.total);
+      console.log('   Total Present employees:', response.data.total);
+    } catch (error) {
+      console.log('❌ Error:', error.response?.data || error.message);
+    }
+
+    console.log('\n' + '='.repeat(50) + '\n');
+
+    // Test 14: Get Absent employees count
+    console.log('14. Testing Attendance Count - Absent Employees');
+    try {
+      const response = await axios.get(`${API_BASE_URL}/v1/employee/search?attendance_status=Absent&page=1&limit=1`, {
+        headers: {
+          'Authorization': `Bearer ${API_TOKEN}`
+        }
+      });
+      console.log('✅ Success - Absent Count:', response.data.total);
+      console.log('   Total Absent employees:', response.data.total);
+    } catch (error) {
+      console.log('❌ Error:', error.response?.data || error.message);
+    }
+
+    console.log('\n' + '='.repeat(50) + '\n');
+
+    // Test 15: Get attendance summary (Present + Absent + Total)
+    console.log('15. Testing Complete Attendance Summary');
+    try {
+      const [presentRes, absentRes, totalRes] = await Promise.all([
+        axios.get(`${API_BASE_URL}/v1/employee/search?attendance_status=Present&page=1&limit=1`, {
+          headers: { 'Authorization': `Bearer ${API_TOKEN}` }
+        }),
+        axios.get(`${API_BASE_URL}/v1/employee/search?attendance_status=Absent&page=1&limit=1`, {
+          headers: { 'Authorization': `Bearer ${API_TOKEN}` }
+        }),
+        axios.get(`${API_BASE_URL}/v1/employee?page=1&limit=1`, {
+          headers: { 'Authorization': `Bearer ${API_TOKEN}` }
+        })
+      ]);
+
+      const presentCount = presentRes.data.total;
+      const absentCount = absentRes.data.total;
+      const totalCount = totalRes.data.total;
+
+      console.log('✅ Complete Attendance Summary:');
+      console.log('   👥 Total Employees:', totalCount);
+      console.log('   ✅ Present Employees:', presentCount, `(${((presentCount/totalCount)*100).toFixed(1)}%)`);
+      console.log('   ❌ Absent Employees:', absentCount, `(${((absentCount/totalCount)*100).toFixed(1)}%)`);
+      console.log('   🧮 Verification:', presentCount + absentCount === totalCount ? 'PASSED' : 'FAILED');
+      
+    } catch (error) {
+      console.log('❌ Error:', error.response?.data || error.message);
+    }
   } catch (error) {
     console.error('Test failed:', error.message);
   }
