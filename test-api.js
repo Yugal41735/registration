@@ -132,6 +132,71 @@ const testAPI = async () => {
     }
 
     console.log('\n' + '='.repeat(50) + '\n');
+
+    // Test 9: Generic search - single field
+    console.log('9. Testing Generic Search - GET /api/v1/employee/search/generic?q=John');
+    try {
+      const response = await axios.get(`${API_BASE_URL}/v1/employee/search/generic?q=John`, {
+        headers: {
+          'Authorization': `Bearer ${API_TOKEN}`
+        }
+      });
+      console.log('✅ Success:', response.data);
+      console.log('   Generic search found:', response.data.total, 'results');
+    } catch (error) {
+      console.log('❌ Error:', error.response?.data || error.message);
+    }
+
+    console.log('\n' + '='.repeat(50) + '\n');
+
+    // Test 10: Partial matching - single character
+    console.log('10. Testing Partial Search - GET /api/v1/employee/search/generic?q=J');
+    try {
+      const response = await axios.get(`${API_BASE_URL}/v1/employee/search/generic?q=J`, {
+        headers: {
+          'Authorization': `Bearer ${API_TOKEN}`
+        }
+      });
+      console.log('✅ Success:', response.data);
+      console.log('   Partial search with "J" found:', response.data.total, 'results');
+      if (response.data.data && response.data.data.length > 0) {
+        console.log('   Sample results:', response.data.data.slice(0, 2));
+      }
+    } catch (error) {
+      console.log('❌ Error:', error.response?.data || error.message);
+    }
+
+    console.log('\n' + '='.repeat(50) + '\n');
+
+    // Test 11: Enhanced field search with partial matching
+    console.log('11. Testing Enhanced Field Search - GET /api/v1/employee/search?first_name=J');
+    try {
+      const response = await axios.get(`${API_BASE_URL}/v1/employee/search?first_name=J`, {
+        headers: {
+          'Authorization': `Bearer ${API_TOKEN}`
+        }
+      });
+      console.log('✅ Success:', response.data);
+      console.log('   Enhanced field search with partial "J" found:', response.data.total, 'results');
+    } catch (error) {
+      console.log('❌ Error:', error.response?.data || error.message);
+    }
+
+    console.log('\n' + '='.repeat(50) + '\n');
+
+    // Test 12: Generic search with city
+    console.log('12. Testing Generic Search for City - GET /api/v1/employee/search/generic?q=Mumbai');
+    try {
+      const response = await axios.get(`${API_BASE_URL}/v1/employee/search/generic?q=Mumbai`, {
+        headers: {
+          'Authorization': `Bearer ${API_TOKEN}`
+        }
+      });
+      console.log('✅ Success:', response.data);
+      console.log('   Generic search for "Mumbai" found:', response.data.total, 'results');
+    } catch (error) {
+      console.log('❌ Error:', error.response?.data || error.message);
+    }
   } catch (error) {
     console.error('Test failed:', error.message);
   }

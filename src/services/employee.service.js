@@ -82,16 +82,98 @@ class EmployeeService {
       };
     }
   }
-  // New: Generic search by any combination of fields except aadhar_link
+
+  // New: Generic search across all fields with partial matching
+  async genericSearch(searchTerm, page = 1, limit = 10) {
+    try {
+      if (!searchTerm || searchTerm.trim() === '') {
+        // If no search term, return all employees with pagination
+        return await this.getAllEmployees(page, limit);
+      }
+
+      const searchPattern = `%${searchTerm.trim()}%`;
+      
+      const where = {
+        OR: [
+          { first_name: { contains: searchTerm.trim(), mode: 'insensitive' } },
+          { last_name: { contains: searchTerm.trim(), mode: 'insensitive' } },
+          { city: { contains: searchTerm.trim(), mode: 'insensitive' } },
+          { whatsapp_number: { contains: searchTerm.trim() } },
+          { employee_id: { contains: searchTerm.trim(), mode: 'insensitive' } },
+          { attendance_status: { equals: searchTerm.trim() } }
+        ]
+      };
+
+      const skip = (page - 1) * limit;
+      const [employees, total] = await Promise.all([
+        this.prisma.employees.findMany({
+          where,
+          skip,
+          take: limit,
+          select: {
+            employee_id: true,
+            first_name: true,
+            last_name: true,
+            city: true,
+            aadhar_link: true,
+            whatsapp_number: true,
+            attendance_status: true
+          }
+        }),
+        this.prisma.employees.count({ where })
+      ]);
+
+      return {
+        success: true,
+        data: employees,
+        count: employees.length,
+        total,
+        page,
+        totalPages: Math.ceil(total / limit),
+        searchTerm: searchTerm.trim()
+      };
+    } catch (error) {
+      throw {
+        statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+        message: 'Error performing generic search',
+        error: error.message
+      };
+    }
+  }
+
+  // Updated: Enhanced search with partial matching support
   async searchEmployees(query = {}, page = 1, limit = 10) {
     try {
       const { first_name, last_name, city, whatsapp_number, attendance_status } = query;
       const where = {};
-      if (first_name) where.first_name = first_name;
-      if (last_name) where.last_name = last_name;
-      if (city) where.city = city;
-      if (whatsapp_number) where.whatsapp_number = whatsapp_number;
-      if (attendance_status) where.attendance_status = attendance_status;
+      
+      // Enhanced search with partial matching (case-insensitive)
+      if (first_name) {
+        where.first_name = { 
+          contains: first_name.trim(), 
+          mode: 'insensitive' 
+        };
+      }
+      if (last_name) {
+        where.last_name = { 
+          contains: last_name.trim(), 
+          mode: 'insensitive' 
+        };
+      }
+      if (city) {
+        where.city = { 
+          contains: city.trim(), 
+          mode: 'insensitive' 
+        };
+      }
+      if (whatsapp_number) {
+        where.whatsapp_number = { 
+          contains: whatsapp_number.trim() 
+        };
+      }
+      if (attendance_status) {
+        where.attendance_status = attendance_status;
+      }
 
       const skip = (page - 1) * limit;
       const [employees, total] = await Promise.all([

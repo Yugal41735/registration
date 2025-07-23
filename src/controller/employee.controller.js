@@ -44,6 +44,25 @@ class EmployeeController {
       });
     }
   }
+
+  // New: Generic search controller
+  async genericSearch(req, res) {
+    try {
+      const { q: searchTerm, page, limit } = req.query;
+      const pageNum = parseInt(page, 10) || 1;
+      const limitNum = parseInt(limit, 10) || 10;
+      
+      const result = await this.employeeService.genericSearch(searchTerm, pageNum, limitNum);
+      return res.status(StatusCodes.OK).json(result);
+    } catch (error) {
+      return res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: error.message,
+        error: error.error
+      });
+    }
+  }
+
   async searchEmployees(req, res) {
     try {
       const { first_name, last_name, city, whatsapp_number, attendance_status, page, limit } = req.query;
